@@ -7,20 +7,26 @@
 
 import Foundation
 struct Users : Decodable {
-    let users: [User]?
+    let data : User?
+    let message : String?
+    let status : Bool?
+    let statusCode : Int?
     
     enum CodingKeys: String, CodingKey {
-        case users = "data"
+        case data = "data"
+        case message = "message"
+        case status = "status"
+        case statusCode = "statusCode"
     }
 }
 struct User : Decodable {
     
     let avatar : String?
     let createdAt : String?
-    let id : String?
-    let knownIps : [String]?
+    let id : Int?
+    let knownIps : String?
     let name : String?
-    let profile : Profile?
+    let profile : Bool?
     let username : String?
     
     enum CodingKeys: String, CodingKey {
@@ -35,29 +41,20 @@ struct User : Decodable {
     
 }
 
-struct Profile : Decodable {
-    
-    let firstName : String?
-    let lastName : String?
-    let staticData : [Int]?
-    
-    enum CodingKeys: String, CodingKey {
-        case firstName = "firstName"
-        case lastName = "lastName"
-        case staticData = "staticData"
-    }
-    
-}
-
-// MARK: - Request models
-struct UserRequestModel: Encodable {
-    var name: String?
-    
-    init(name: String) {
-        self.name = name
-    }
-    
-    enum CodingKeys: String, CodingKey {
-        case name = "name"
-    }
-}
+/*
+ https://mocki.io/v1/68d121fd-7f2b-4613-9b3d-184618a074f6
+ {
+   "status": false,
+   "data": {
+     "avatar": "Hello",
+     "createdAt": "bearer",
+     "id": 1638124432221,
+     "knownIps": "Saturday, November 27, 2021",
+     "name": "Hadi Ali",
+     "profile": true,
+     "username": "Hadi"
+   },
+   "statusCode": 1500,
+   "message": "Success"
+ }
+ */

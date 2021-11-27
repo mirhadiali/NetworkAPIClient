@@ -8,62 +8,35 @@
 import Foundation
 import Alamofire
 
+enum Result<T> {
+    case success(T)
+    case failure(Error)
+}
+
 class NetworkRequest {
-     static func callAPI(request: URLRequestConvertible, showLoader: Bool = true, onSuccess successBlock: ((Parameters) -> Void)?, onFailure failureBlock: ((Parameters, Bool) -> Void)? = nil) -> DataRequest {
-        AF.request(request).responseDecodable(of: User.self) { (response) in
-            response.value
-        }
-        return AF.request(request).responseJSON { (response) in
-            
+    static func callAPI<ResponseModel : Decodable>(request: URLRequestConvertible, showLoader: Bool = true, onSuccess successBlock: ((ResponseModel) -> Void)?, onFailure failureBlock: ((Error, Bool) -> Void)? = nil, castTo: ResponseModel.Type) {
+        AF.request(request).responseDecodable(of: castTo.self) { (response) in
             /// Handle failure closure
-            let handleFailure: (_: Parameters, _: Any, _: Error?) -> Void = { errorDictionary, log, errorObject in
+            let handleFailure: (_: Parameters, _: Any, _: Error) -> Void = { errorDictionary, log, error in
                 var isNetworkError = false
-                if let error = errorObject as NSError?, error.code == NSURLErrorNotConnectedToInternet {
+                if let error = error as NSError?, error.code == NSURLErrorNotConnectedToInternet {
                     isNetworkError = true
                     // Show network error message
 //                    Helper.showMessage(text: Constants.APIError.network)
                 }
                 // Execute failure closure
-                failureBlock?(errorDictionary, isNetworkError)
+                failureBlock?(error, isNetworkError)
             }
             
             switch response.result {
             case .success(let value):
                 // Check if response contains a dictionary
-                guard let successDictionary = value as? Parameters else {
-                    // Execute failure closure handler
-                    
-                    successBlock?(["data":value])
-//                    handleFailure(["message": "APIErrorGeneral".localized], "APIErrorLogMessage".localized, nil)
-                    return
-                }
+                successBlock?(value)
                 // Checking Webservice API failure response codes
-                if let code = successDictionary["status_code"] as? Int {
-                    switch code {
-                    case Constants.APIResponseCode.APIErrorCode.invalidJson.rawValue,
-                         Constants.APIResponseCode.APIErrorCode.invalidDataProvided.rawValue:
-                        
-                        // Execute failure closure handler
-                        handleFailure(successDictionary, "APIErrorLogMessage".localized, nil)
-                    case Constants.APIResponseCode.APIErrorCode.unauthorized.rawValue:
-                        //                        Helper.logoutUser()
-                        break
-                        
-                    case Constants.APIResponseCode.APISuccessCode.ok.rawValue:
-                        // Execute success closure if Webservice API success response code is found
-                        successBlock?(successDictionary)
-                    default:
-                        // Execute failure closure handler
-                        handleFailure(successDictionary, "APIErrorSomethingWentWrong".localized, nil)
-                    }
-                } else {
-                    // Execute success closure if Webservice API response code is not found but contains dictionary
-                    successBlock?(successDictionary)
-                }
             case .failure(let error):
                 // Execute failure closure handler
                 if error.localizedDescription.contains("Software caused connection abort") {
-                    _ = callAPI(request: request, onSuccess: successBlock, onFailure: failureBlock)
+                    callAPI(request: request, onSuccess: successBlock, onFailure: failureBlock, castTo: castTo)
                 } else {
                     handleFailure(["message": error.localizedDescription], "APIErrorLogMessage".localized, error)
                 }
@@ -71,7 +44,7 @@ class NetworkRequest {
         }
     }
     
-    static func mapData<T: Decodable>(data: Parameters, castTo: T.Type) -> T? {
+    static func decodeJSONResponse<T: Decodable>(data: Parameters, castTo: T.Type) -> T? {
         var json: Data!
         do {
             json = try JSONSerialization.data(withJSONObject: data, options: .fragmentsAllowed)

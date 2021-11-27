@@ -8,8 +8,9 @@
 import Foundation
 import Alamofire
 
-enum TestApiClient: URLRequestConvertible {
-    static var baseURL = URL(string: "https://61587d915167ba00174bbb25.mockapi.io/api/v1/")
+enum RequestBuilder: URLRequestConvertible {
+    static var baseURL = URL(string: "https://mocki.io/v1/68d121fd-7f2b-4613-9b3d-184618a074f6")
+    //"https://61587d915167ba00174bbb25.mockapi.io/api/v1/")
     
     case getUsers
     case getUserByID(id: Int)
@@ -49,8 +50,9 @@ enum TestApiClient: URLRequestConvertible {
         
         // Complete URL
         let url: URL = {
-            let url = URL(string: relativePath, relativeTo: TestApiClient.baseURL)
-            return url!
+            return RequestBuilder.baseURL!
+//            let url = URL(string: relativePath, relativeTo: RequestBuilder.baseURL)
+//            return url!
         }()
 
         // Encode parameters
@@ -68,6 +70,8 @@ enum TestApiClient: URLRequestConvertible {
         
         // Configuring HTTP method
         urlRequest.httpMethod = method.rawValue
+        
+        urlRequest.setValue("application/json", forHTTPHeaderField: "Content-Type")
         
         // Timeout interval for Webservice API request
         urlRequest.timeoutInterval = 30

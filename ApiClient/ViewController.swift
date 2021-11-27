@@ -16,18 +16,9 @@ class ViewController: UIViewController {
 
 
     @IBAction func didTapTest(_ sender: Any) {
-//        NetworkRequest.callAPI(request: TestApiClient.getUserByID(id: 1)) { (response) in
-//            guard var response = NetworkRequest.mapData(data: response, castTo: User.self) else {
-//                return
-//            }
-//            print(response)
-//        }
-        NetworkRequest.callAPI(request: TestApiClient.getUsers) { (response) in
-            guard var response = NetworkRequest.mapData(data: response, castTo: Users.self) else {
-                return
-            }
-            print(response)
+        AuthInteractor.shared.getUsers { (user, error) in
+            print(user)
+            print(error)
         }
     }
 }
-
