@@ -14,7 +14,7 @@ enum RequestBuilder: URLRequestConvertible {
     
     case getUsers
     case getUserByID(id: Int)
-    case getUserByParam(params: UserRequestModel)
+    case getUserByParam(params: User)
     
     func asURLRequest() throws -> URLRequest {
         var method: HTTPMethod {

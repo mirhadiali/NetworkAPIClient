@@ -19,7 +19,7 @@ struct Users : Decodable {
         case statusCode = "statusCode"
     }
 }
-struct User : Decodable {
+struct User : Codable {
     
     let avatar : String?
     let createdAt : String?
